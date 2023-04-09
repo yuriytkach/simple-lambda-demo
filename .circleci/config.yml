@@ -1,16 +1,18 @@
 version: 2.1
 
 orbs:
-  java-build: expi/java-build@1.0.0
+  gradle: circleci/gradle@3.0.0
 
 jobs:
   build_and_test:
-    executor: java-build/gradle
+    executor: gradle/java
     steps:
       - checkout
-      - run:
-          name: Build and test
-          command: ./gradlew build --no-daemon
+      - gradle/with-cache:
+          steps:
+            - run:
+                name: Build and test
+                command: ./gradlew build --no-daemon
       - persist_to_workspace:
           root: build
           paths:
