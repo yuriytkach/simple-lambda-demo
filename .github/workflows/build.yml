@@ -45,10 +45,7 @@ jobs:
         path: |
           build/test-results/test
           build/reports/tests/test
-          
-    - name: Build Native
-      run: ./gradlew build -x test -Dquarkus.package.type=native -Dquarkus.native.container-build=true
-          
+            
     - name: Create GitHub release and upload function.zip
       uses: softprops/action-gh-release@v1
       env:
