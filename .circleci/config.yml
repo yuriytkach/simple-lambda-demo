@@ -8,7 +8,7 @@ jobs:
     executor: gradle/java
     steps:
       - checkout
-      - gradle/with-cache:
+      - with-cache:
           steps:
             - run:
                 name: Build and test
