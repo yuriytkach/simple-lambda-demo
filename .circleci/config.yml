@@ -23,6 +23,9 @@ jobs:
       - run:
           name: Test
           command: ./gradlew test
+      - run:
+          name: Native Build
+          command: ./gradlew build -x test -Dquarkus.package.type=native -Dquarkus.native.container-build=true
       - store_test_results:
           path: build/test-results/test
       - store_artifacts:
