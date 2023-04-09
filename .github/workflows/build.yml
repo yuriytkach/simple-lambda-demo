@@ -47,3 +47,14 @@ jobs:
         path: |
           build/test-results/test
           build/reports/tests/test
+          
+    - name: Create GitHub release and upload function.zip
+      uses: softprops/action-gh-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        files: |
+          build/function.zip
+        tag_name: ${{ github.sha }}
+        name: Release ${{ github.sha }}
+        prerelease: false
