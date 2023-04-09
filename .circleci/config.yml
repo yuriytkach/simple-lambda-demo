@@ -1,0 +1,61 @@
+version: 2.1
+
+jobs:
+  build_and_test:
+    docker:
+      - image: circleci/openjdk:17-jdk
+    environment:
+      _JAVA_OPTIONS: "-Xmx3g"
+    steps:
+      - checkout
+      - restore_cache:
+          key: gradle-{{ checksum "build.gradle" }}
+      - run:
+          name: Build and test
+          command: ./gradlew build
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: gradle-{{ checksum "build.gradle" }}
+      - run:
+          name: Create function.zip
+          command: ./gradlew packageFunction
+      - persist_to_workspace:
+          root: build
+          paths:
+            - function.zip
+
+  deploy:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          name: Install AWS CLI
+          command: |
+            sudo apt update
+            sudo apt install -y unzip
+            sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            sudo unzip awscliv2.zip
+            sudo ./aws/install
+            aws --version
+      - run:
+          name: Deploy function.zip to AWS Lambda
+          command: |
+            RELEASE_TAG=release-circleci-${CIRCLE_BUILD_NUM}
+            aws lambda update-function-code --function-name bbb --zip-file fileb:///tmp/workspace/function.zip --publish --region eu-west-1
+            aws lambda tag-resource --resource arn:aws:lambda:eu-west-1:330065802977:function:bbb --tags release=${RELEASE_TAG}
+
+workflows:
+  version: 2
+  build-test-publish-deploy:
+    jobs:
+      - build_and_test
+      - deploy:
+          context: org-global
+          requires:
+            - build_and_test
+          filters:
+            branches:
+              only: main
