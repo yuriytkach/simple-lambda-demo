@@ -1,25 +1,16 @@
 version: 2.1
 
+orbs:
+  java-build: expi/java-build@1.0.0
+
 jobs:
   build_and_test:
-    docker:
-      - image: circleci/openjdk:17-jdk
-    environment:
-      _JAVA_OPTIONS: "-Xmx3g"
+    executor: java-build/gradle
     steps:
       - checkout
-      - restore_cache:
-          key: gradle-{{ checksum "build.gradle" }}
-      - run:
-          name: Build and test
-          command: ./gradlew build
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: gradle-{{ checksum "build.gradle" }}
-      - run:
-          name: Create function.zip
-          command: ./gradlew packageFunction
+      - java-build/install-gradle-cache
+      - java-build/build-and-test:
+          tasks: clean build
       - persist_to_workspace:
           root: build
           paths:
