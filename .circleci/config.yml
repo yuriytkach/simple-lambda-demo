@@ -41,7 +41,6 @@ jobs:
           paths:
             - function.zip
 
-jobs:
   deploy:
     docker:
       - image: circleci/python:3.7
